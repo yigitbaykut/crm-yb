@@ -18,27 +18,27 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#0D1312; --surface:#141C1B; --surface-2:#1B2524; --surface-3:#222E2C;
-    --line:#26332F; --line-strong:#3A4844;
-    --ink:#E7EEEC; --ink-2:#A6B4B1; --ink-3:#7C8A87;
-    --accent:#4CB9A9; --accent-soft:#11302E; --accent-line:#2A5F59;
-    --warn:#DCA75E; --warn-soft:#2F2511; --warn-line:#5E4A20;
-    --good:#6BBC8D; --good-soft:#112A1C; --good-line:#2A5539;
-    --bad:#E3859C; --bad-soft:#31131A; --bad-line:#5E2B36;
-    --mute-soft:#1F2928; --mute-line:#35423F;
-    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -16px rgba(0,0,0,.7);
+    --bg:#18211F; --surface:#212C2A; --surface-2:#2A3634; --surface-3:#33403D;
+    --line:#384643; --line-strong:#51615D;
+    --ink:#EFF5F3; --ink-2:#BBC8C5; --ink-3:#94A29E;
+    --accent:#5FCDBB; --accent-soft:#1B443F; --accent-line:#3C7A72;
+    --warn:#E8B872; --warn-soft:#41321A; --warn-line:#7A6130;
+    --good:#81D0A2; --good-soft:#1B3B2A; --good-line:#3A6C4D;
+    --bad:#F29BAF; --bad-soft:#432029; --bad-line:#783C49;
+    --mute-soft:#2C3836; --mute-line:#445250;
+    --shadow:0 1px 2px rgba(0,0,0,.28), 0 10px 28px -16px rgba(0,0,0,.5);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0D1312; --surface:#141C1B; --surface-2:#1B2524; --surface-3:#222E2C;
-  --line:#26332F; --line-strong:#3A4844;
-  --ink:#E7EEEC; --ink-2:#A6B4B1; --ink-3:#7C8A87;
-  --accent:#4CB9A9; --accent-soft:#11302E; --accent-line:#2A5F59;
-  --warn:#DCA75E; --warn-soft:#2F2511; --warn-line:#5E4A20;
-  --good:#6BBC8D; --good-soft:#112A1C; --good-line:#2A5539;
-  --bad:#E3859C; --bad-soft:#31131A; --bad-line:#5E2B36;
-  --mute-soft:#1F2928; --mute-line:#35423F;
-  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -16px rgba(0,0,0,.7);
+  --bg:#18211F; --surface:#212C2A; --surface-2:#2A3634; --surface-3:#33403D;
+  --line:#384643; --line-strong:#51615D;
+  --ink:#EFF5F3; --ink-2:#BBC8C5; --ink-3:#94A29E;
+  --accent:#5FCDBB; --accent-soft:#1B443F; --accent-line:#3C7A72;
+  --warn:#E8B872; --warn-soft:#41321A; --warn-line:#7A6130;
+  --good:#81D0A2; --good-soft:#1B3B2A; --good-line:#3A6C4D;
+  --bad:#F29BAF; --bad-soft:#432029; --bad-line:#783C49;
+  --mute-soft:#2C3836; --mute-line:#445250;
+  --shadow:0 1px 2px rgba(0,0,0,.28), 0 10px 28px -16px rgba(0,0,0,.5);
 }
 
 *{box-sizing:border-box}
@@ -162,6 +162,8 @@ textarea.field{resize:vertical; min-height:62px}
 .detail-meta{font-family:var(--mono); font-size:11.5px; color:var(--ink-3); overflow-wrap:anywhere}
 .btn-danger{color:var(--bad); border-color:var(--bad-line); background:transparent}
 .btn-danger:hover{background:var(--bad-soft); border-color:var(--bad)}
+.btn-danger.armed{background:var(--bad); border-color:var(--bad); color:var(--surface)}
+.btn-danger.armed:hover{background:var(--bad); filter:brightness(1.06)}
 
 .empty{padding:40px 16px; text-align:center; color:var(--ink-3); font-size:13.5px}
 .empty strong{display:block; font-family:var(--serif); font-size:22px; color:var(--ink-2); font-weight:400; margin-bottom:6px}
@@ -784,10 +786,20 @@ $("chips-status").addEventListener("click", function(ev){
   filter.group = b.getAttribute("data-group"); renderChips(); renderRows();
 });
 
+var delTimer = null;
+function disarmDelete(btn){
+  if(!btn) return;
+  btn.removeAttribute("data-armed");
+  btn.classList.remove("armed");
+  btn.textContent = "Sil";
+  btn.removeAttribute("title");
+}
+
 $("rows").addEventListener("click", async function(ev){
   var head = ev.target.closest(".row-head");
   if(head){
     var id = head.getAttribute("data-id");
+    clearTimeout(delTimer);
     expanded = (expanded === id) ? null : id;
     renderRows();
     return;
@@ -815,10 +827,21 @@ $("rows").addEventListener("click", async function(ev){
   if(del){
     var did = del.getAttribute("data-del");
     var rec = apps.get(did) || {};
-    if(!window.confirm((rec.company || "Bu kayıt") + " silinsin mi? Geri alınamaz.")) return;
-    if(!db){ toast("Kayıt deposu kapalı, silinemedi.", true); return; }
-    try { await db.doc("applications/"+did).delete(); expanded = null; toast("Silindi."); }
-    catch(e){ toast(dbErrText(e), true); }
+    if(del.getAttribute("data-armed") !== "1"){
+      // sandbox'lı çerçevede window.confirm engellenebiliyor; onayı iki adımda sayfa içinde alıyoruz
+      del.setAttribute("data-armed", "1");
+      del.classList.add("armed");
+      del.textContent = "Gerçekten sil";
+      del.title = (rec.company || "Bu kayıt") + " kalıcı olarak silinecek";
+      clearTimeout(delTimer);
+      delTimer = setTimeout(function(){ disarmDelete(del); }, 5000);
+      return;
+    }
+    clearTimeout(delTimer);
+    if(!db){ disarmDelete(del); toast("Kayıt deposu bu görünümde kapalı, silinemedi.", true); return; }
+    del.disabled = true; del.textContent = "Siliniyor…";
+    try { await db.doc("applications/"+did).delete(); expanded = null; toast((rec.company || "Kayıt") + " silindi."); }
+    catch(e){ del.disabled = false; disarmDelete(del); toast(dbErrText(e), true); }
   }
 });
 
