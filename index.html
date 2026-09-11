@@ -2,12 +2,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
+  color-scheme:light;
   /* palet rampasi: tereyagi -> seftali -> mercan -> gul -> pembe -> fusya -> magenta */
   --butter:#F7E4A8; --peach:#F8CFA0; --coral:#F3A896; --rose:#F19199;
   --pink:#EF7791; --fuchsia:#F04C84; --magenta:#EA2A6E;
 
-  --bg-grad:linear-gradient(165deg,#FFFAF0 0%,#FFF3E6 32%,#FFEAE8 64%,#FFE3EE 100%);
-  --tile-grad:linear-gradient(150deg,#FFFCF4 0%,#FFF4EC 55%,#FFEDEF 100%);
+  --bg-grad:linear-gradient(160deg,#FFFFFF 0%,#FEFAF2 38%,#FAF2E3 72%,#F6EBD6 100%);
+  --tile-grad:linear-gradient(150deg,#FFFFFF 0%,#FFFCF5 58%,#FDF6E9 100%);
   --accent-grad:linear-gradient(135deg,#D72169 0%,#A81250 100%);
   --h1-grad:linear-gradient(100deg,#EA2A6E 0%,#E8447E 45%,#D2603C 100%);
   --rule-grad:linear-gradient(90deg,#F7E4A8,#F3A896 40%,#EA2A6E);
@@ -33,54 +34,7 @@
   --sans:var(--ui); --mono:var(--ui); --serif:var(--ui);
   --code:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg-grad:linear-gradient(165deg,#1B0910 0%,#260D18 35%,#310F1F 70%,#3A1226 100%);
-    --tile-grad:linear-gradient(150deg,#31141E 0%,#3A1A26 55%,#431C2E 100%);
-    --accent-grad:linear-gradient(135deg,#FF9CBB 0%,#F2508A 100%);
-    --h1-grad:linear-gradient(100deg,#FFD98E 0%,#FF9A84 45%,#FF5E97 100%);
-    --rule-grad:linear-gradient(90deg,#F7E4A8,#F3A896 40%,#EA2A6E);
-
-    --surface:#2B1119; --surface-2:#361A24; --surface-3:#42222E;
-    --line:#4A2836; --line-strong:#6E3A4C;
-    --ink:#FDEFF3; --ink-2:#E3C2CB; --ink-3:#C79DAA;
-    --accent:#FF74A8; --accent-soft:#4A1430; --accent-line:#8A2E58; --on-accent:#2A0512;
-
-    --s1-bg:#3B3012; --s1-line:#61501F; --s1-fg:#F2DFA2;
-    --s2-bg:#402B15; --s2-line:#6A4722; --s2-fg:#F7D2A6;
-    --s3-bg:#44201A; --s3-line:#6F3528; --s3-fg:#F7B8A8;
-    --s4-bg:#471B26; --s4-line:#742E3E; --s4-fg:#F9A6B7;
-    --s5-bg:#4A1430; --s5-line:#7C2354; --s5-fg:#FD93BC;
-    --neg-bg:#3E1A1F; --neg-line:#662E36; --neg-fg:#F2A2AC;
-    --muted-bg:#342530; --muted-line:#4F3B46; --muted-fg:#CBB0BA;
-    --hot-fg:#F3C777;
-
-    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -16px rgba(0,0,0,.55);
-  }
-}
-:root[data-theme="dark"]{
-  --bg-grad:linear-gradient(165deg,#1B0910 0%,#260D18 35%,#310F1F 70%,#3A1226 100%);
-  --tile-grad:linear-gradient(150deg,#31141E 0%,#3A1A26 55%,#431C2E 100%);
-  --accent-grad:linear-gradient(135deg,#FF9CBB 0%,#F2508A 100%);
-  --h1-grad:linear-gradient(100deg,#FFD98E 0%,#FF9A84 45%,#FF5E97 100%);
-  --rule-grad:linear-gradient(90deg,#F7E4A8,#F3A896 40%,#EA2A6E);
-  
-  --surface:#2B1119; --surface-2:#361A24; --surface-3:#42222E;
-  --line:#4A2836; --line-strong:#6E3A4C;
-  --ink:#FDEFF3; --ink-2:#E3C2CB; --ink-3:#C79DAA;
-  --accent:#FF74A8; --accent-soft:#4A1430; --accent-line:#8A2E58; --on-accent:#2A0512;
-  
-  --s1-bg:#3B3012; --s1-line:#61501F; --s1-fg:#F2DFA2;
-  --s2-bg:#402B15; --s2-line:#6A4722; --s2-fg:#F7D2A6;
-  --s3-bg:#44201A; --s3-line:#6F3528; --s3-fg:#F7B8A8;
-  --s4-bg:#471B26; --s4-line:#742E3E; --s4-fg:#F9A6B7;
-  --s5-bg:#4A1430; --s5-line:#7C2354; --s5-fg:#FD93BC;
-  --neg-bg:#3E1A1F; --neg-line:#662E36; --neg-fg:#F2A2AC;
-  --muted-bg:#342530; --muted-line:#4F3B46; --muted-fg:#CBB0BA;
-  --hot-fg:#F3C777;
-  
-  --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -16px rgba(0,0,0,.55);
-}
+/* tek tema: palet acik oldugu icin koyu varyant yok */
 
 *{box-sizing:border-box}
 body{
