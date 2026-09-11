@@ -266,7 +266,10 @@ var STATUS = {
 };
 var STATUS_ORDER = ["gonderildi","cevap","gorusme","case","teklif","red","kapandi"];
 var OPEN = ["gonderildi","cevap","gorusme","case","teklif"];
-var KINDS = {sirket:"Şirket", akademi:"Akademi", kulup:"Kulüp / Diğer"};
+var KINDS = {sirket:"Şirket", startup:"Startup Reachout", research:"Research Reachout", kulup:"Kulüp / Diğer"};
+// "akademi" eski kayıtlarda kaldı; Research Reachout altında görünsün diye eşliyoruz
+var KIND_ALIAS = {akademi:"research"};
+function kindOf(rec){ var k = rec && rec.kind; k = KIND_ALIAS[k] || k; return KINDS[k] ? k : "sirket"; }
 var FREE_MAIL = ["gmail.com","googlemail.com","outlook.com","hotmail.com","yahoo.com","icloud.com","proton.me","protonmail.com","yandex.com","live.com","msn.com"];
 var STALE_DAYS = 10;
 
@@ -393,7 +396,7 @@ function candidateFromThread(t){
   var bounced = incoming.some(function(m){ return /mailer-daemon|postmaster/i.test(m.sender||""); });
   var replied = incoming.some(function(m){ return !/mailer-daemon|postmaster/i.test(m.sender||""); });
   var dates = msgs.map(function(m){ return String(m.date||"").slice(0,10); }).filter(Boolean).sort();
-  var kind = isAcademic(dom) ? "akademi" : "sirket";
+  var kind = isAcademic(dom) ? "research" : "sirket";
   return {
     id: t.id,
     company: companyFromDomain(dom) || nameFromAddr(to) || "Bilinmeyen",
@@ -518,7 +521,7 @@ async function polishCands(){
   var rows = cands.slice(0, 40).map(function(c){ return {id:c.id, to:c.contact, subject:c.subject, guess:c.company}; });
   var prompt = "Aşağıda bir öğrencinin gönderdiği iş/staj/araştırma başvuru maillerinin alıcı adresi ve konusu var. " +
     "Her satır için kurumun insanların kullandığı gerçek adını ve varsa başvurulan rolü çıkar.\n" +
-    "kind alanı şunlardan biri olsun: sirket (şirket/startup), akademi (üniversite, profesör), kulup (kulüp, dernek, topluluk, etkinlik).\n" +
+    "kind alanı şunlardan biri olsun: sirket (ilana yapılan şirket başvurusu), startup (ilan olmadan startup'a atılan mail), research (üniversite, profesör, araştırma), kulup (kulüp, dernek, topluluk, etkinlik).\n" +
     "Rol belli değilse role alanını boş string bırak. Şirket adını tahmin edemiyorsan guess değerini koru.\n" +
     "Yalnızca şu biçimde bir JSON dizisi döndür, başka hiçbir şey yazma: " +
     '[{"id":"...","company":"...","role":"...","kind":"sirket"}]\n\n' +
@@ -532,7 +535,7 @@ async function polishCands(){
       var r = byId.get(c.id); if(!r) return c;
       if(r.company && String(r.company).trim()){ c.company = String(r.company).trim(); n++; }
       if(typeof r.role === "string") c.role = r.role.trim();
-      if(r.kind && KINDS[r.kind]) c.kind = r.kind;
+      if(r.kind && KINDS[KIND_ALIAS[r.kind] || r.kind]) c.kind = KIND_ALIAS[r.kind] || r.kind;
       return c;
     });
     toast(n + " kaydın şirket adı düzeltildi.");
@@ -608,7 +611,7 @@ function renderCands(){
   }
   $("cand-list").innerHTML = cands.map(function(c){
     var tags = [];
-    tags.push('<span class="tag">'+esc(KINDS[c.kind]||c.kind)+'</span>');
+    tags.push('<span class="tag">'+esc(KINDS[kindOf(c)])+'</span>');
     if(c.bounced) tags.push('<span class="tag bounce">adres bulunamadı</span>');
     else if(c.replied) tags.push('<span class="tag">cevap var</span>');
     return '<div class="cand" data-id="'+esc(c.id)+'">' +
@@ -636,7 +639,7 @@ function renderChips(){
 
 function visible(){
   return list().filter(function(a){
-    if(filter.kind !== "all" && a.kind !== filter.kind) return false;
+    if(filter.kind !== "all" && kindOf(a) !== filter.kind) return false;
     var g = (STATUS[a.status] || {}).group;
     if(filter.group === "all") return true;
     if(filter.group === "open") return g === "waiting" || g === "active";
@@ -656,8 +659,10 @@ function statusSelect(id, cur){
   }).join("") + '</select>';
 }
 function kindSelect(id, cur){
+  var sel = KIND_ALIAS[cur] || cur;
+  if(!KINDS[sel]) sel = "sirket";
   return '<select class="field" id="f-kind-'+esc(id)+'">' + Object.keys(KINDS).map(function(k){
-    return '<option value="'+k+'"'+(k===cur?" selected":"")+'>'+esc(KINDS[k])+'</option>';
+    return '<option value="'+k+'"'+(k===sel?" selected":"")+'>'+esc(KINDS[k])+'</option>';
   }).join("") + '</select>';
 }
 
@@ -691,7 +696,7 @@ function renderRows(){
         '<div class="fgroup"><label for="f-company-'+esc(a.id)+'">Kurum</label><input class="field" id="f-company-'+esc(a.id)+'" value="'+esc(a.company||"")+'"></div>' +
         '<div class="fgroup"><label for="f-role-'+esc(a.id)+'">Rol</label><input class="field" id="f-role-'+esc(a.id)+'" value="'+esc(a.role||"")+'"></div>' +
         '<div class="fgroup"><label for="f-status-'+esc(a.id)+'">Durum</label>'+statusSelect(a.id, a.status)+'</div>' +
-        '<div class="fgroup"><label for="f-kind-'+esc(a.id)+'">Tür</label>'+kindSelect(a.id, a.kind||"sirket")+'</div>' +
+        '<div class="fgroup"><label for="f-kind-'+esc(a.id)+'">Tür</label>'+kindSelect(a.id, kindOf(a))+'</div>' +
         '<div class="fgroup"><label for="f-next-'+esc(a.id)+'">Sıradaki adım</label><input class="field" id="f-next-'+esc(a.id)+'" value="'+esc(a.nextAction||"")+'" placeholder="ör. 18 Eylül\'de hatırlatma at"></div>' +
         '<div class="fgroup"><label for="f-last-'+esc(a.id)+'">Son hareket</label><input class="field" type="date" id="f-last-'+esc(a.id)+'" value="'+esc((a.lastActivityAt||a.sentAt||"").slice(0,10))+'"></div>' +
       '</div>' +
