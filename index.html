@@ -1,0 +1,867 @@
+<title>Başvuru Hattı</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+:root{
+  --bg:#F6F8F7; --surface:#FFFFFF; --surface-2:#EDF1F0; --surface-3:#E3E9E7;
+  --line:#DBE3E1; --line-strong:#BFCCC9;
+  --ink:#121918; --ink-2:#44514F; --ink-3:#6C7B78;
+  --accent:#0E6F68; --accent-soft:#DBEDEA; --accent-line:#9CCCC5;
+  --warn:#8F5B0D; --warn-soft:#F7EAD3; --warn-line:#E0BE84;
+  --good:#2B6B47; --good-soft:#DCEBE1; --good-line:#9BC7AB;
+  --bad:#A03A50; --bad-soft:#F5DFE4; --bad-line:#DFA7B4;
+  --mute-soft:#E7EBEA; --mute-line:#C8D2D0;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(18,25,24,.05), 0 8px 24px -14px rgba(18,25,24,.28);
+  --sans:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --serif:"Instrument Serif", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1312; --surface:#141C1B; --surface-2:#1B2524; --surface-3:#222E2C;
+    --line:#26332F; --line-strong:#3A4844;
+    --ink:#E7EEEC; --ink-2:#A6B4B1; --ink-3:#7C8A87;
+    --accent:#4CB9A9; --accent-soft:#11302E; --accent-line:#2A5F59;
+    --warn:#DCA75E; --warn-soft:#2F2511; --warn-line:#5E4A20;
+    --good:#6BBC8D; --good-soft:#112A1C; --good-line:#2A5539;
+    --bad:#E3859C; --bad-soft:#31131A; --bad-line:#5E2B36;
+    --mute-soft:#1F2928; --mute-line:#35423F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1312; --surface:#141C1B; --surface-2:#1B2524; --surface-3:#222E2C;
+  --line:#26332F; --line-strong:#3A4844;
+  --ink:#E7EEEC; --ink-2:#A6B4B1; --ink-3:#7C8A87;
+  --accent:#4CB9A9; --accent-soft:#11302E; --accent-line:#2A5F59;
+  --warn:#DCA75E; --warn-soft:#2F2511; --warn-line:#5E4A20;
+  --good:#6BBC8D; --good-soft:#112A1C; --good-line:#2A5539;
+  --bad:#E3859C; --bad-soft:#31131A; --bad-line:#5E2B36;
+  --mute-soft:#1F2928; --mute-line:#35423F;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--sans);
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1060px; margin:0 auto; padding-inline:20px; padding-block:28px 72px;}
+h1,h2,h3{margin:0; text-wrap:balance}
+button{font:inherit; color:inherit; cursor:pointer}
+input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+
+/* ---------- header ---------- */
+.masthead{display:flex; flex-wrap:wrap; align-items:flex-end; gap:16px 24px; justify-content:space-between; padding-bottom:18px; border-bottom:1px solid var(--line-strong)}
+.brand h1{font-family:var(--serif); font-size:40px; font-weight:400; letter-spacing:-.01em; line-height:1}
+.brand p{margin:7px 0 0; color:var(--ink-3); font-size:13.5px; max-width:52ch}
+.masthead-meta{display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:12px; color:var(--ink-3)}
+.dot{width:7px; height:7px; border-radius:50%; background:var(--mute-line); flex:none}
+.dot.on{background:var(--good)}
+.dot.off{background:var(--bad)}
+
+/* ---------- summary tiles ---------- */
+.tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:22px}
+.tile{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px 15px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:2px}
+.tile .k{font-size:11.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-3); font-weight:500}
+.tile .v{font-family:var(--serif); font-size:36px; line-height:1.05; font-variant-numeric:tabular-nums}
+.tile .n{font-size:12.5px; color:var(--ink-3)}
+.tile.alert{border-color:var(--warn-line); background:var(--warn-soft)}
+.tile.alert .v, .tile.alert .k{color:var(--warn)}
+.tile.alert .n{color:var(--warn)}
+
+/* ---------- panels ---------- */
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); margin-top:22px}
+.panel-head{display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid var(--line)}
+.panel-head.bare{border-bottom:0}
+.panel-title{display:flex; align-items:baseline; gap:9px}
+.panel-title h2{font-size:14px; font-weight:600; letter-spacing:.005em}
+.panel-title .count{font-family:var(--mono); font-size:12px; color:var(--ink-3)}
+.panel-body{padding:16px}
+
+/* ---------- buttons ---------- */
+.btn{border:1px solid var(--line-strong); background:var(--surface-2); padding:7px 13px; border-radius:7px; font-size:13.5px; font-weight:500; display:inline-flex; align-items:center; gap:7px; transition:background .12s, border-color .12s}
+.btn:hover{background:var(--surface-3); border-color:var(--ink-3)}
+.btn-primary{background:var(--accent); border-color:var(--accent); color:#fff}
+:root[data-theme="dark"] .btn-primary, :root:not([data-theme="light"]) .btn-primary{color:#08201E}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .btn-primary{color:#fff} }
+.btn-primary:hover{background:var(--accent); border-color:var(--accent); filter:brightness(1.08)}
+.btn-quiet{border-color:transparent; background:transparent; color:var(--ink-3); padding:5px 9px}
+.btn-quiet:hover{background:var(--surface-2); color:var(--ink); border-color:transparent}
+.btn[disabled]{opacity:.5; cursor:not-allowed}
+.btn-sm{padding:5px 10px; font-size:12.5px}
+
+/* ---------- sync ---------- */
+.sync-row{display:flex; flex-wrap:wrap; align-items:center; gap:12px}
+.sync-note{font-family:var(--mono); font-size:12px; color:var(--ink-3)}
+#sync-body{padding:0 16px}
+#sync-body .notice{margin-bottom:16px}
+.query-edit{margin-top:14px; margin-bottom:16px; display:none}
+.query-edit.open{display:block}
+.query-edit label{display:block; font-size:11.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-3); font-weight:500; margin-bottom:6px}
+.field{width:100%; background:var(--bg); border:1px solid var(--line-strong); border-radius:7px; padding:9px 11px; font-family:var(--mono); font-size:12.5px; line-height:1.5}
+textarea.field{resize:vertical; min-height:62px}
+
+/* ---------- notices ---------- */
+.notice{display:flex; gap:10px; align-items:flex-start; padding:11px 14px; border-radius:8px; font-size:13.5px; border:1px solid; margin-top:14px}
+.notice p{margin:0}
+.notice strong{font-weight:600}
+.notice.warn{background:var(--warn-soft); border-color:var(--warn-line); color:var(--warn)}
+.notice.bad{background:var(--bad-soft); border-color:var(--bad-line); color:var(--bad)}
+.notice.info{background:var(--accent-soft); border-color:var(--accent-line); color:var(--accent)}
+.notice a{color:inherit}
+
+/* ---------- candidates ---------- */
+.cand{display:grid; grid-template-columns:1fr auto; gap:10px 16px; align-items:center; padding:11px 16px; border-bottom:1px solid var(--line)}
+.cand:last-child{border-bottom:0}
+.cand-main{min-width:0}
+.cand-top{display:flex; flex-wrap:wrap; align-items:baseline; gap:8px}
+.cand-co{font-weight:600; font-size:14px}
+.cand-to{font-family:var(--mono); font-size:11.5px; color:var(--ink-3); overflow-wrap:anywhere}
+.cand-sub{font-size:13px; color:var(--ink-2); margin-top:2px; overflow-wrap:anywhere}
+.cand-acts{display:flex; gap:7px; flex:none}
+
+/* ---------- filter bar ---------- */
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{border:1px solid var(--line-strong); background:transparent; color:var(--ink-2); padding:5px 11px; border-radius:999px; font-size:12.5px; font-weight:500}
+.chip:hover{border-color:var(--ink-3); color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--bg)}
+
+/* ---------- application rows ---------- */
+.rows{display:flex; flex-direction:column}
+.row{border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row-head{display:grid; grid-template-columns:4px minmax(0,2.1fr) minmax(0,1.5fr) 92px 92px 118px; align-items:center; gap:14px; width:100%; text-align:left; background:transparent; border:0; padding:12px 16px 12px 0; font:inherit}
+.row-head:hover{background:var(--surface-2)}
+.stripe{align-self:stretch; border-radius:0 3px 3px 0; background:var(--mute-line)}
+.stripe.good{background:var(--good)} .stripe.bad{background:var(--bad)}
+.stripe.accent{background:var(--accent)} .stripe.warn{background:var(--warn)}
+.cell-co{min-width:0}
+.co-name{font-weight:600; font-size:14.5px; display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+.co-role{font-size:12.5px; color:var(--ink-3); margin-top:1px}
+.cell-sub{font-size:13px; color:var(--ink-2); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.cell-date{font-family:var(--mono); font-size:12.5px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.cell-days{font-family:var(--mono); font-size:13px; font-variant-numeric:tabular-nums; color:var(--ink-2)}
+.cell-days.hot{color:var(--warn); font-weight:500}
+.pill{display:inline-block; padding:3px 9px; border-radius:999px; font-size:11.5px; font-weight:500; border:1px solid var(--mute-line); background:var(--mute-soft); color:var(--ink-2); white-space:nowrap}
+.pill.good{background:var(--good-soft); border-color:var(--good-line); color:var(--good)}
+.pill.bad{background:var(--bad-soft); border-color:var(--bad-line); color:var(--bad)}
+.pill.accent{background:var(--accent-soft); border-color:var(--accent-line); color:var(--accent)}
+.pill.warn{background:var(--warn-soft); border-color:var(--warn-line); color:var(--warn)}
+.tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); border:1px solid var(--line-strong); padding:1px 6px; border-radius:4px}
+.tag.bounce{color:var(--bad); border-color:var(--bad-line); background:var(--bad-soft)}
+
+/* ---------- row detail ---------- */
+.detail{padding:4px 16px 18px 18px; background:var(--surface-2); border-top:1px solid var(--line)}
+.detail-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(190px,1fr)); gap:12px 16px; padding-top:14px}
+.fgroup{display:flex; flex-direction:column; gap:5px}
+.fgroup label{font-size:11.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-3); font-weight:500}
+.fgroup .field{font-family:var(--sans); font-size:13.5px}
+.detail-foot{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; padding-top:14px}
+.detail-meta{font-family:var(--mono); font-size:11.5px; color:var(--ink-3); overflow-wrap:anywhere}
+.btn-danger{color:var(--bad); border-color:var(--bad-line); background:transparent}
+.btn-danger:hover{background:var(--bad-soft); border-color:var(--bad)}
+
+.empty{padding:40px 16px; text-align:center; color:var(--ink-3); font-size:13.5px}
+.empty strong{display:block; font-family:var(--serif); font-size:22px; color:var(--ink-2); font-weight:400; margin-bottom:6px}
+
+/* ---------- toast ---------- */
+#toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%); display:flex; flex-direction:column; gap:8px; z-index:40; width:min(440px, calc(100vw - 32px))}
+.toast{background:var(--ink); color:var(--bg); padding:10px 14px; border-radius:8px; font-size:13px; box-shadow:var(--shadow)}
+.toast.err{background:var(--bad); color:#fff}
+
+@media (max-width:860px){
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .row-head{grid-template-columns:4px 1fr; gap:4px 12px; padding:12px 14px 12px 0; row-gap:6px}
+  .stripe{grid-row:1 / span 4}
+  .cell-sub, .cell-date, .cell-days, .cell-status{grid-column:2}
+  .cell-sub{white-space:normal}
+  .cell-date::before{content:"Gönderim "; color:var(--ink-3)}
+  .cell-days{display:inline-block}
+}
+@media (max-width:520px){
+  .brand h1{font-size:32px}
+  .tiles{grid-template-columns:1fr 1fr}
+  .cand{grid-template-columns:1fr}
+  .cand-acts{justify-content:flex-start}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important; animation:none !important}}
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand">
+      <h1>Başvuru Hattı</h1>
+      <p>Gönderdiğin staj, rol ve araştırma maillerinin hangisine cevap geldi, hangisi kaç gündür sessiz.</p>
+    </div>
+    <div class="masthead-meta"><span class="dot" id="db-dot"></span><span id="db-state">bağlanıyor…</span></div>
+  </header>
+
+  <section class="tiles" id="tiles" aria-label="Özet"></section>
+
+  <section class="panel">
+    <div class="panel-head bare">
+      <div class="sync-row">
+        <button class="btn btn-primary" id="btn-sync">Gmail'i tara</button>
+        <span class="sync-note" id="sync-note">henüz taranmadı</span>
+      </div>
+      <button class="btn btn-quiet btn-sm" id="btn-query">Arama sorgusu</button>
+    </div>
+    <div id="sync-body">
+      <div class="query-edit" id="query-edit">
+        <label for="q-input">Gmail arama sorgusu</label>
+        <textarea class="field" id="q-input" spellcheck="false"></textarea>
+        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap">
+          <button class="btn btn-sm" id="btn-query-save">Kaydet</button>
+          <button class="btn btn-quiet btn-sm" id="btn-query-reset">Varsayılana dön</button>
+        </div>
+      </div>
+      <div id="sync-msg"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="cand-panel" hidden>
+    <div class="panel-head">
+      <div class="panel-title"><h2>Taramadan gelen yeni mailler</h2><span class="count" id="cand-count"></span></div>
+      <div style="display:flex; gap:8px">
+        <button class="btn btn-sm" id="btn-cand-all">Hepsini ekle</button>
+        <button class="btn btn-quiet btn-sm" id="btn-cand-clear">Listeyi kapat</button>
+      </div>
+    </div>
+    <div id="cand-list"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-title"><h2>Başvurular</h2><span class="count" id="list-count"></span></div>
+      <div class="chips" id="chips-kind" role="group" aria-label="Tür filtresi"></div>
+    </div>
+    <div class="panel-head" style="padding-top:10px; padding-bottom:10px">
+      <div class="chips" id="chips-status" role="group" aria-label="Durum filtresi"></div>
+      <button class="btn btn-sm" id="btn-new">Elle ekle</button>
+    </div>
+    <div id="new-form" hidden></div>
+    <div class="rows" id="rows"></div>
+  </section>
+</div>
+<div id="toast" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- sabitler ---------------- */
+var DEFAULT_QUERY = 'in:sent newer_than:1y (staj OR internship OR intern OR başvuru OR ilan OR pozisyon OR rolü OR application OR apply OR CV OR resume) -subject:"undergraduate\'s question"';
+var STATUS = {
+  gonderildi:{label:"Gönderildi",  tone:"",       group:"waiting"},
+  cevap:     {label:"Cevap geldi", tone:"good",   group:"active"},
+  gorusme:   {label:"Görüşme",     tone:"accent", group:"active"},
+  "case":    {label:"Case / Ödev", tone:"accent", group:"active"},
+  teklif:    {label:"Teklif",      tone:"good",   group:"active"},
+  red:       {label:"Olumsuz",     tone:"bad",    group:"closed"},
+  kapandi:   {label:"Kapandı",     tone:"",       group:"closed"}
+};
+var STATUS_ORDER = ["gonderildi","cevap","gorusme","case","teklif","red","kapandi"];
+var OPEN = ["gonderildi","cevap","gorusme","case","teklif"];
+var KINDS = {sirket:"Şirket", akademi:"Akademi", kulup:"Kulüp / Diğer"};
+var FREE_MAIL = ["gmail.com","googlemail.com","outlook.com","hotmail.com","yahoo.com","icloud.com","proton.me","protonmail.com","yandex.com","live.com","msn.com"];
+var STALE_DAYS = 10;
+
+/* ---------------- yardımcılar ---------------- */
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function $(id){ return document.getElementById(id); }
+function todayISO(){ var d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); }
+function dayDiff(iso){
+  if(!iso) return null;
+  var a = Date.parse(iso.length>10?iso:iso+"T00:00:00Z");
+  if(isNaN(a)) return null;
+  var b = Date.parse(todayISO()+"T00:00:00Z");
+  return Math.max(0, Math.round((b-a)/864e5));
+}
+function fmtDate(iso){ return iso ? String(iso).slice(0,10).split("-").reverse().join(".") : "—"; }
+function titleCase(s){ return String(s||"").replace(/\S+/g, function(w){ return w.charAt(0).toLocaleUpperCase("tr")+w.slice(1); }); }
+
+var toastBox = $("toast");
+function toast(msg, isErr){
+  var el = document.createElement("div");
+  el.className = "toast" + (isErr ? " err" : "");
+  el.textContent = msg;
+  toastBox.appendChild(el);
+  setTimeout(function(){ el.remove(); }, isErr ? 7000 : 3600);
+}
+
+/* ---------------- durum ---------------- */
+var db = null, dbReady = false;
+var apps = new Map();           // id -> kayıt
+var cands = [];                 // taramadan gelen, henüz eklenmemiş
+var ignored = new Set();        // "başvuru değil" denenler
+var cfg = {query: DEFAULT_QUERY, lastSync: null};
+var filter = {kind:"all", group:"open"};
+var expanded = null;
+var mcpNs = null, sampleNs = null;
+
+/* ---------------- db bağlantısı ---------------- */
+function dbErrText(e){
+  var c = e && e.code;
+  if(c==="not_granted"||c==="capability_disabled"||c==="capability_removed") return "Bu görünümde kayıt deposu çalışmıyor, değişiklik saklanmadı.";
+  if(c==="revoked") return "Bu sayfaya erişimin değişti; değişiklikler artık saklanmıyor. Sayfayı yenile.";
+  if(c==="quota_exceeded") return "Kayıt sınırına ulaşıldı. Kapanmış başvurulardan bazılarını sil.";
+  if(c==="resource_exhausted") return "Çok hızlı gitti, bir saniye bekleyip tekrar dene.";
+  if(c==="invalid_argument") return "Kayıt reddedildi: alanlardan biri geçersiz.";
+  return "Kayıt sırasında bir sorun çıktı, değişiklik saklanmamış olabilir.";
+}
+function setDbState(kind, text){
+  var dot = $("db-dot"); dot.className = "dot" + (kind ? " "+kind : "");
+  $("db-state").textContent = text;
+}
+
+if(window.claude && typeof window.claude.use === "function"){
+  window.claude.use("db").then(function(d){
+    if(!d){ setDbState("off","kayıt deposu kapalı"); renderAll(); return; }
+    db = d; dbReady = true; setDbState("on","kayıtlar saklanıyor");
+    d.collection("applications").onSnapshot(function(snap){
+      apps = new Map(snap.docs.map(function(x){ return [x.id, x.data()||{}]; }));
+      renderAll();
+    }, function(e){ setDbState("off","bağlantı düştü"); toast(dbErrText(e), true); });
+    d.doc("meta/config").onSnapshot(function(s){
+      if(s.exists){ var v=s.data()||{}; if(v.query) cfg.query=v.query; if(v.lastSync) cfg.lastSync=v.lastSync; }
+      renderSync();
+    }, function(){});
+    d.doc("meta/ignored").onSnapshot(function(s){
+      ignored = new Set((s.exists && (s.data()||{}).ids) || []);
+      renderCands();
+    }, function(){});
+  }, function(){ setDbState("off","kayıt deposu kapalı"); renderAll(); });
+
+  window.claude.use("mcp").then(function(m){ mcpNs = m; renderSync(); }, function(){});
+  window.claude.use("sample").then(function(s){ sampleNs = s; renderCands(); }, function(){});
+} else {
+  setDbState("off","önizleme — kayıt yok");
+}
+
+async function writeDoc(path, body){
+  if(!db){ toast("Kayıt deposu bu görünümde kapalı, değişiklik saklanmadı.", true); return false; }
+  try { await db.doc(path).set(body); return true; }
+  catch(e){ toast(dbErrText(e), true); return false; }
+}
+async function patchDoc(path, body){
+  if(!db){ toast("Kayıt deposu bu görünümde kapalı, değişiklik saklanmadı.", true); return false; }
+  try { await db.doc(path).update(body); return true; }
+  catch(e){ toast(dbErrText(e), true); return false; }
+}
+
+/* ---------------- mail → başvuru çıkarımı ---------------- */
+function domainOf(addr){ var m = /@([^>\s,;]+)/.exec(String(addr||"")); return m ? m[1].toLowerCase().replace(/\.$/,"") : ""; }
+function isAcademic(dom){ return /(^|\.)(edu|ac)(\.[a-z]{2,3})?$/.test(dom) || /\b(univ|university|universite|universiteti)\b/.test(dom); }
+function isFreeMail(dom){ return FREE_MAIL.indexOf(dom) >= 0; }
+
+function companyFromDomain(dom){
+  if(!dom || isFreeMail(dom)) return "";
+  var parts = dom.split(".");
+  var drop = {com:1,net:1,org:1,co:1,io:1,ai:1,tr:1,uk:1,ac:1,edu:1,gov:1,me:1,dev:1,app:1,ventures:1,tech:1,xyz:1,info:1,biz:1,us:1,de:1,nl:1,ch:1,se:1};
+  var core = parts.filter(function(p){ return !drop[p]; });
+  var name = core.length ? core[core.length-1] : parts[0];
+  if(/^\d+$/.test(name) && parts.length) name = parts[0];
+  return titleCase(name.replace(/[-_]+/g," "));
+}
+function roleFromSubject(subj){
+  var s = String(subj||"").replace(/^(re|fwd|ynt|ilt)\s*:\s*/i, "").trim();
+  s = s.replace(/[-–—]\s*Yiğit Baykut\s*$/i, "").trim();
+  s = s.replace(/\s*(hakkında|hk\.?)\s*$/i, "").trim();
+  s = s.replace(/\s*(ilanı|ilani|rolü|rolu|pozisyonu|başvurusu|basvurusu)\s*$/i, "").trim();
+  if(!s || s.length > 46) return "";
+  return s;
+}
+function nameFromAddr(addr){
+  var local = String(addr||"").split("@")[0] || "";
+  if(!local) return "";
+  return titleCase(local.replace(/[._-]+/g, " ").replace(/\d+/g, "").trim());
+}
+
+function candidateFromThread(t){
+  var msgs = (t && t.messages) || [];
+  if(!msgs.length) return null;
+  var sent = msgs.filter(function(m){ return (m.labelIds||[]).indexOf("SENT") >= 0; });
+  if(!sent.length) return null;                       // benim göndermediğim yazışma
+  var first = sent[0];
+  var to = (first.toRecipients || [])[0] || "";
+  var dom = domainOf(to);
+  var incoming = msgs.filter(function(m){ return (m.labelIds||[]).indexOf("SENT") < 0; });
+  var bounced = incoming.some(function(m){ return /mailer-daemon|postmaster/i.test(m.sender||""); });
+  var replied = incoming.some(function(m){ return !/mailer-daemon|postmaster/i.test(m.sender||""); });
+  var dates = msgs.map(function(m){ return String(m.date||"").slice(0,10); }).filter(Boolean).sort();
+  var kind = isAcademic(dom) ? "akademi" : "sirket";
+  return {
+    id: t.id,
+    company: companyFromDomain(dom) || nameFromAddr(to) || "Bilinmeyen",
+    contact: to,
+    contactName: nameFromAddr(to),
+    role: roleFromSubject(first.subject),
+    subject: String(first.subject || "").slice(0, 180),
+    kind: kind,
+    sentAt: String(first.date||"").slice(0,10),
+    lastActivityAt: dates.length ? dates[dates.length-1] : String(first.date||"").slice(0,10),
+    replied: replied, bounced: bounced,
+    status: bounced ? "kapandi" : (replied ? "cevap" : "gonderildi"),
+    source: "gmail", threadId: t.id
+  };
+}
+
+/* ---------------- Gmail taraması ---------------- */
+function mcpErr(e){
+  var c = e && e.code;
+  if(c==="server_not_connected") return {msg:"Gmail bağlı değil. claude.ai → Ayarlar → Bağlayıcılar'dan Gmail'i ekle, sonra tekrar dene.", tone:"warn"};
+  if(c==="needs_reauth")         return {msg:"Gmail bağlantısının süresi dolmuş. claude.ai → Ayarlar → Bağlayıcılar'dan yeniden bağlan.", tone:"warn"};
+  if(c==="selection_required")   return {msg:"Birden fazla Gmail hesabı bağlı. Açılan pencereden hangisini kullanacağını seç, sonra tekrar tara.", tone:"warn"};
+  if(c==="not_in_manifest")      return {msg:"Bu sayfaya Gmail izni verilmemiş. Sayfayı yenileyip çıkan izin isteğini onayla.", tone:"warn"};
+  if(c==="blocked_by_policy"||c==="approval_required") return {msg:"Kurum ayarları bu sayfanın Gmail'i okumasına izin vermiyor. Başvuruları elle ekleyebilirsin.", tone:"bad"};
+  if(c==="not_granted"||c==="capability_disabled"||c==="capability_removed") return {msg:"Bu görünümde Gmail taraması çalışmıyor. Başvuruları elle ekleyebilirsin.", tone:"warn"};
+  if(c==="cancelled")            return {msg:"Tarama yarıda kesildi.", tone:"warn"};
+  if(c==="server_unavailable"||c==="rate_limited") return {msg:"Gmail şu an yanıt vermedi. Biraz bekleyip tekrar dene.", tone:"warn"};
+  if(c==="tool_error")           return {msg:"Gmail aramayı reddetti: " + (e.message||"sorgu kabul edilmedi") + " — sorguyu sadeleştirip tekrar dene.", tone:"bad"};
+  if(c==="bad_request")          return {msg:"Arama isteği geçersiz. Sorguyu varsayılana döndürüp tekrar dene.", tone:"bad"};
+  return {msg:"Gmail taraması tamamlanamadı" + (e && e.message ? ": "+e.message : "."), tone:"bad"};
+}
+function unwrap(res){
+  var p = (res && res.payload !== undefined) ? res.payload : null;
+  if(p == null && res && res.content){
+    for(var i=0;i<res.content.length;i++){ if(res.content[i] && res.content[i].type==="text"){ p = res.content[i].text; break; } }
+  }
+  if(p == null) p = res;
+  if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(_){ return {threads:[]}; } }
+  if(Array.isArray(p)) return {threads:p};
+  if(!p || typeof p !== "object") return {threads:[]};
+  return p;
+}
+function setSyncMsg(html){ $("sync-msg").innerHTML = html; }
+
+var syncing = false;
+async function syncGmail(){
+  if(syncing) return;
+  var btn = $("btn-sync");
+  if(!mcpNs){
+    setSyncMsg('<div class="notice warn"><p>Bu görünümde Gmail taraması çalışmıyor. Sayfayı claude.ai üzerinde açarsan tarama gelir; şimdilik <strong>Elle ekle</strong> ile devam edebilirsin.</p></div>');
+    return;
+  }
+  syncing = true; btn.disabled = true; btn.textContent = "Taranıyor…";
+  setSyncMsg('<div class="notice info"><p>Gmail taranıyor, gönderilmiş mailler okunuyor…</p></div>');
+
+  var threads = [], token = null, retried = false;
+  try {
+    for(var page = 0; page < 4; page++){
+      var input = {query: cfg.query, pageSize: 50, view: "THREAD_VIEW_MINIMAL"};
+      if(token) input.pageToken = token;
+      var res;
+      try {
+        res = await mcpNs.callTool("Gmail", "search_threads", input);
+      } catch(e){
+        if(!retried && e && e.retryable && page === 0){
+          retried = true;
+          await new Promise(function(r){ setTimeout(r, Math.min(e.retryAfterMs || 1500, 6000) + Math.random()*600); });
+          res = await mcpNs.callTool("Gmail", "search_threads", input);
+        } else { throw e; }
+      }
+      var data = unwrap(res);
+      var got = data.threads || [];
+      threads = threads.concat(got);
+      token = data.nextPageToken || null;
+      if(!token || !got.length) break;
+    }
+  } catch(e){
+    var info = mcpErr(e);
+    setSyncMsg('<div class="notice '+info.tone+'"><p>'+esc(info.msg)+'</p></div>');
+    syncing = false; btn.disabled = false; btn.textContent = "Gmail'i tara";
+    return;
+  }
+
+  var fresh = [], updated = 0;
+  threads.forEach(function(t){
+    var c = candidateFromThread(t);
+    if(!c) return;
+    if(apps.has(c.id)){
+      // zaten kayıtlı: cevap ya da bounce durumunu tazele, elle girilen bilgiye dokunma
+      var cur = apps.get(c.id) || {};
+      var patch = {};
+      if(c.replied && !cur.replied) patch.replied = true;
+      if(c.bounced && !cur.bounced) patch.bounced = true;
+      if(c.lastActivityAt && c.lastActivityAt !== cur.lastActivityAt) patch.lastActivityAt = c.lastActivityAt;
+      if(c.replied && cur.status === "gonderildi") patch.status = "cevap";
+      if(Object.keys(patch).length){ updated++; patchDoc("applications/"+c.id, patch); }
+      return;
+    }
+    if(ignored.has(c.id)) return;
+    fresh.push(c);
+  });
+
+  cands = fresh;
+  cfg.lastSync = new Date().toISOString();
+  writeDoc("meta/config", {query: cfg.query, lastSync: cfg.lastSync});
+
+  var bits = [];
+  bits.push(threads.length + " yazışma tarandı");
+  bits.push(fresh.length ? fresh.length + " yeni aday bulundu" : "yeni aday yok");
+  if(updated) bits.push(updated + " kayıt güncellendi");
+  setSyncMsg('<div class="notice info"><p>'+esc(bits.join(" · "))+'.</p></div>');
+
+  syncing = false; btn.disabled = false; btn.textContent = "Gmail'i tara";
+  renderAll();
+}
+
+/* ---------------- Claude ile şirket/rol düzeltme ---------------- */
+var polishing = false;
+async function polishCands(){
+  if(!sampleNs || polishing || !cands.length) return;
+  polishing = true; renderCands();
+  var rows = cands.slice(0, 40).map(function(c){ return {id:c.id, to:c.contact, subject:c.subject, guess:c.company}; });
+  var prompt = "Aşağıda bir öğrencinin gönderdiği iş/staj/araştırma başvuru maillerinin alıcı adresi ve konusu var. " +
+    "Her satır için kurumun insanların kullandığı gerçek adını ve varsa başvurulan rolü çıkar.\n" +
+    "kind alanı şunlardan biri olsun: sirket (şirket/startup), akademi (üniversite, profesör), kulup (kulüp, dernek, topluluk, etkinlik).\n" +
+    "Rol belli değilse role alanını boş string bırak. Şirket adını tahmin edemiyorsan guess değerini koru.\n" +
+    "Yalnızca şu biçimde bir JSON dizisi döndür, başka hiçbir şey yazma: " +
+    '[{"id":"...","company":"...","role":"...","kind":"sirket"}]\n\n' +
+    JSON.stringify(rows);
+  try {
+    var out = await sampleNs.json(prompt, {modelTier:"default"});
+    if(!Array.isArray(out)) throw {code:"invalid_json"};
+    var byId = new Map(out.filter(function(r){ return r && r.id; }).map(function(r){ return [String(r.id), r]; }));
+    var n = 0;
+    cands = cands.map(function(c){
+      var r = byId.get(c.id); if(!r) return c;
+      if(r.company && String(r.company).trim()){ c.company = String(r.company).trim(); n++; }
+      if(typeof r.role === "string") c.role = r.role.trim();
+      if(r.kind && KINDS[r.kind]) c.kind = r.kind;
+      return c;
+    });
+    toast(n + " kaydın şirket adı düzeltildi.");
+  } catch(e){
+    var c = e && e.code;
+    if(c==="not_granted") toast("Claude'a sorma izni verilmedi; adları elle düzeltebilirsin.", true);
+    else if(c==="rate_limited") toast("Çok sık istendi. Biraz bekleyip tekrar dene.", true);
+    else if(c==="invalid_json") toast("Claude'un cevabı okunamadı. Tekrar denemek için butona bas.", true);
+    else toast("Adlar düzeltilemedi; elle değiştirebilirsin.", true);
+  }
+  polishing = false; renderCands();
+}
+
+/* ---------------- görünüm ---------------- */
+function list(){
+  var out = [];
+  apps.forEach(function(a, id){ out.push(Object.assign({id:id}, a)); });
+  return out;
+}
+function silence(a){
+  if(STATUS[a.status] && STATUS[a.status].group === "closed") return null;
+  return dayDiff(a.lastActivityAt || a.sentAt);
+}
+function isStale(a){
+  var d = silence(a);
+  return d != null && d >= STALE_DAYS && (a.status === "gonderildi");
+}
+
+function renderTiles(){
+  var all = list();
+  var waiting = all.filter(function(a){ return a.status === "gonderildi"; });
+  var stale = all.filter(isStale);
+  var active = all.filter(function(a){ return ["cevap","gorusme","case","teklif"].indexOf(a.status) >= 0; });
+  var last30 = all.filter(function(a){ var d = dayDiff(a.sentAt); return d != null && d <= 30; });
+  var tiles = [
+    {k:"Cevap bekleyen", v:waiting.length, n:"gönderildi, henüz dönüş yok"},
+    {k:STALE_DAYS+"+ gündür sessiz", v:stale.length, n:stale.length ? "hatırlatma maili zamanı" : "takipte gecikme yok", alert: stale.length > 0},
+    {k:"Yürüyen süreç", v:active.length, n:"cevap, görüşme, case, teklif"},
+    {k:"Son 30 gün", v:last30.length, n:"gönderilen başvuru"}
+  ];
+  $("tiles").innerHTML = tiles.map(function(t){
+    return '<div class="tile'+(t.alert?" alert":"")+'"><span class="k">'+esc(t.k)+'</span><span class="v">'+t.v+'</span><span class="n">'+esc(t.n)+'</span></div>';
+  }).join("");
+}
+
+function renderSync(){
+  var note = $("sync-note");
+  if(cfg.lastSync){
+    var d = new Date(cfg.lastSync);
+    note.textContent = "son tarama " + fmtDate(cfg.lastSync) + " " + String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+  } else {
+    note.textContent = "henüz taranmadı";
+  }
+  if($("q-input") !== document.activeElement) $("q-input").value = cfg.query;
+}
+
+function renderCands(){
+  var panel = $("cand-panel");
+  if(!cands.length){ panel.hidden = true; return; }
+  panel.hidden = false;
+  $("cand-count").textContent = cands.length + " mail";
+  var head = panel.querySelector(".panel-head > div:last-child");
+  var polishBtn = $("btn-cand-polish");
+  if(sampleNs && !polishBtn){
+    polishBtn = document.createElement("button");
+    polishBtn.className = "btn btn-sm"; polishBtn.id = "btn-cand-polish";
+    polishBtn.addEventListener("click", polishCands);
+    head.insertBefore(polishBtn, head.firstChild);
+  }
+  if(polishBtn){
+    polishBtn.textContent = polishing ? "Düzeltiliyor…" : "Claude ile adları düzelt";
+    polishBtn.disabled = polishing;
+  }
+  $("cand-list").innerHTML = cands.map(function(c){
+    var tags = [];
+    tags.push('<span class="tag">'+esc(KINDS[c.kind]||c.kind)+'</span>');
+    if(c.bounced) tags.push('<span class="tag bounce">adres bulunamadı</span>');
+    else if(c.replied) tags.push('<span class="tag">cevap var</span>');
+    return '<div class="cand" data-id="'+esc(c.id)+'">' +
+      '<div class="cand-main">' +
+        '<div class="cand-top"><span class="cand-co">'+esc(c.company)+'</span>'+tags.join("")+'<span class="cand-to">'+esc(c.contact)+'</span></div>' +
+        '<div class="cand-sub">'+esc(c.subject || "(konu yok)")+' · <span style="font-family:var(--mono)">'+esc(fmtDate(c.sentAt))+'</span></div>' +
+      '</div>' +
+      '<div class="cand-acts">' +
+        '<button class="btn btn-sm" data-act="add">Ekle</button>' +
+        '<button class="btn btn-quiet btn-sm" data-act="skip">Başvuru değil</button>' +
+      '</div></div>';
+  }).join("");
+}
+
+function renderChips(){
+  var kinds = [["all","Hepsi"]].concat(Object.keys(KINDS).map(function(k){ return [k, KINDS[k]]; }));
+  $("chips-kind").innerHTML = kinds.map(function(p){
+    return '<button class="chip" data-kind="'+p[0]+'" aria-pressed="'+(filter.kind===p[0])+'">'+esc(p[1])+'</button>';
+  }).join("");
+  var groups = [["open","Açık süreçler"],["waiting","Cevap bekleyen"],["active","Yürüyen"],["closed","Sonuçlanan"],["all","Tümü"]];
+  $("chips-status").innerHTML = groups.map(function(p){
+    return '<button class="chip" data-group="'+p[0]+'" aria-pressed="'+(filter.group===p[0])+'">'+esc(p[1])+'</button>';
+  }).join("");
+}
+
+function visible(){
+  return list().filter(function(a){
+    if(filter.kind !== "all" && a.kind !== filter.kind) return false;
+    var g = (STATUS[a.status] || {}).group;
+    if(filter.group === "all") return true;
+    if(filter.group === "open") return g === "waiting" || g === "active";
+    return g === filter.group;
+  }).sort(function(x, y){
+    var sx = silence(x), sy = silence(y);
+    if(sx == null && sy == null) return String(y.sentAt||"").localeCompare(String(x.sentAt||""));
+    if(sx == null) return 1;
+    if(sy == null) return -1;
+    return sy - sx;
+  });
+}
+
+function statusSelect(id, cur){
+  return '<select class="field" id="f-status-'+esc(id)+'">' + STATUS_ORDER.map(function(s){
+    return '<option value="'+s+'"'+(s===cur?" selected":"")+'>'+esc(STATUS[s].label)+'</option>';
+  }).join("") + '</select>';
+}
+function kindSelect(id, cur){
+  return '<select class="field" id="f-kind-'+esc(id)+'">' + Object.keys(KINDS).map(function(k){
+    return '<option value="'+k+'"'+(k===cur?" selected":"")+'>'+esc(KINDS[k])+'</option>';
+  }).join("") + '</select>';
+}
+
+function renderRows(){
+  var rows = visible();
+  $("list-count").textContent = rows.length + " kayıt" + (apps.size !== rows.length ? " / " + apps.size : "");
+  if(!rows.length){
+    $("rows").innerHTML = '<div class="empty"><strong>Bu filtrede kayıt yok</strong>' +
+      (apps.size ? 'Filtreyi değiştir ya da yeni bir başvuru ekle.' : 'Başlamak için <em>Gmail\'i tara</em> de, ya da ilk başvuruyu elle ekle.') + '</div>';
+    return;
+  }
+  $("rows").innerHTML = rows.map(function(a){
+    var st = STATUS[a.status] || STATUS.gonderildi;
+    var d = silence(a);
+    var hot = isStale(a);
+    var tone = hot ? "warn" : st.tone;
+    var tags = a.bounced ? '<span class="tag bounce">adres yok</span>' : "";
+    var open = expanded === a.id;
+    var head = '<button class="row-head" data-id="'+esc(a.id)+'" aria-expanded="'+open+'">' +
+      '<span class="stripe '+tone+'"></span>' +
+      '<span class="cell-co"><span class="co-name">'+esc(a.company||"—")+tags+'</span>' +
+        '<span class="co-role">'+esc([a.role, a.contactName].filter(Boolean).join(" · ") || a.contact || "")+'</span></span>' +
+      '<span class="cell-sub">'+esc(a.subject||"")+'</span>' +
+      '<span class="cell-date">'+esc(fmtDate(a.sentAt))+'</span>' +
+      '<span class="cell-days'+(hot?" hot":"")+'">'+(d==null?"—":d+" gün")+'</span>' +
+      '<span class="cell-status"><span class="pill '+st.tone+'">'+esc(st.label)+'</span></span>' +
+      '</button>';
+    if(!open) return '<div class="row">'+head+'</div>';
+    var det = '<div class="detail">' +
+      '<div class="detail-grid">' +
+        '<div class="fgroup"><label for="f-company-'+esc(a.id)+'">Kurum</label><input class="field" id="f-company-'+esc(a.id)+'" value="'+esc(a.company||"")+'"></div>' +
+        '<div class="fgroup"><label for="f-role-'+esc(a.id)+'">Rol</label><input class="field" id="f-role-'+esc(a.id)+'" value="'+esc(a.role||"")+'"></div>' +
+        '<div class="fgroup"><label for="f-status-'+esc(a.id)+'">Durum</label>'+statusSelect(a.id, a.status)+'</div>' +
+        '<div class="fgroup"><label for="f-kind-'+esc(a.id)+'">Tür</label>'+kindSelect(a.id, a.kind||"sirket")+'</div>' +
+        '<div class="fgroup"><label for="f-next-'+esc(a.id)+'">Sıradaki adım</label><input class="field" id="f-next-'+esc(a.id)+'" value="'+esc(a.nextAction||"")+'" placeholder="ör. 18 Eylül\'de hatırlatma at"></div>' +
+        '<div class="fgroup"><label for="f-last-'+esc(a.id)+'">Son hareket</label><input class="field" type="date" id="f-last-'+esc(a.id)+'" value="'+esc((a.lastActivityAt||a.sentAt||"").slice(0,10))+'"></div>' +
+      '</div>' +
+      '<div class="fgroup" style="margin-top:12px"><label for="f-notes-'+esc(a.id)+'">Notlar</label>' +
+        '<textarea class="field" id="f-notes-'+esc(a.id)+'" placeholder="Görüşmede konuşulanlar, kimden referans, ne sözü verildi…">'+esc(a.notes||"")+'</textarea></div>' +
+      '<div class="detail-foot">' +
+        '<span class="detail-meta">'+esc(a.contact||"")+(a.threadId?' · gmail thread '+esc(a.threadId):' · elle eklendi')+'</span>' +
+        '<span style="display:flex; gap:8px">' +
+          '<button class="btn btn-danger btn-sm" data-del="'+esc(a.id)+'">Sil</button>' +
+          '<button class="btn btn-primary btn-sm" data-save="'+esc(a.id)+'">Kaydet</button>' +
+        '</span>' +
+      '</div></div>';
+    return '<div class="row">'+head+det+'</div>';
+  }).join("");
+}
+
+function renderAll(){ renderTiles(); renderChips(); renderCands(); renderRows(); renderSync(); }
+
+/* ---------------- etkileşim ---------------- */
+$("btn-sync").addEventListener("click", syncGmail);
+
+$("btn-query").addEventListener("click", function(){
+  var box = $("query-edit");
+  box.classList.toggle("open");
+  if(box.classList.contains("open")) $("q-input").focus();
+});
+$("btn-query-save").addEventListener("click", async function(){
+  var v = $("q-input").value.trim();
+  if(!v){ toast("Sorgu boş olamaz.", true); return; }
+  cfg.query = v;
+  await writeDoc("meta/config", {query: cfg.query, lastSync: cfg.lastSync});
+  toast("Sorgu kaydedildi.");
+  $("query-edit").classList.remove("open");
+});
+$("btn-query-reset").addEventListener("click", function(){
+  $("q-input").value = DEFAULT_QUERY;
+});
+
+async function addCandidate(c){
+  var body = {
+    company: c.company, role: c.role || "", contact: c.contact, contactName: c.contactName || "",
+    subject: c.subject, kind: c.kind, status: c.status,
+    sentAt: c.sentAt, lastActivityAt: c.lastActivityAt,
+    replied: !!c.replied, bounced: !!c.bounced,
+    notes: "", nextAction: "", source: "gmail", threadId: c.threadId,
+    updatedAt: new Date().toISOString()
+  };
+  return writeDoc("applications/" + c.id, body);
+}
+async function ignoreCandidate(id){
+  ignored.add(id);
+  await writeDoc("meta/ignored", {ids: Array.from(ignored).slice(-2000)});
+}
+
+$("cand-list").addEventListener("click", async function(ev){
+  var btn = ev.target.closest("button[data-act]"); if(!btn) return;
+  var row = btn.closest(".cand"); var id = row && row.getAttribute("data-id");
+  var idx = cands.findIndex(function(c){ return c.id === id; });
+  if(idx < 0) return;
+  var c = cands[idx];
+  btn.disabled = true;
+  if(btn.getAttribute("data-act") === "add"){
+    var ok = await addCandidate(c);
+    if(!ok){ btn.disabled = false; return; }
+    toast(c.company + " eklendi.");
+  } else {
+    await ignoreCandidate(id);
+  }
+  cands.splice(idx, 1);
+  renderCands();
+});
+
+$("btn-cand-all").addEventListener("click", async function(){
+  var btn = this; btn.disabled = true; btn.textContent = "Ekleniyor…";
+  var batch = cands.slice(), added = 0;
+  for(var i = 0; i < batch.length; i++){
+    var ok = await addCandidate(batch[i]);
+    if(ok){ added++; cands = cands.filter(function(c){ return c.id !== batch[i].id; }); }
+  }
+  btn.disabled = false; btn.textContent = "Hepsini ekle";
+  toast(added + " başvuru eklendi.");
+  renderCands();
+});
+$("btn-cand-clear").addEventListener("click", function(){ cands = []; renderCands(); });
+
+$("chips-kind").addEventListener("click", function(ev){
+  var b = ev.target.closest("button[data-kind]"); if(!b) return;
+  filter.kind = b.getAttribute("data-kind"); renderChips(); renderRows();
+});
+$("chips-status").addEventListener("click", function(ev){
+  var b = ev.target.closest("button[data-group]"); if(!b) return;
+  filter.group = b.getAttribute("data-group"); renderChips(); renderRows();
+});
+
+$("rows").addEventListener("click", async function(ev){
+  var head = ev.target.closest(".row-head");
+  if(head){
+    var id = head.getAttribute("data-id");
+    expanded = (expanded === id) ? null : id;
+    renderRows();
+    return;
+  }
+  var save = ev.target.closest("button[data-save]");
+  if(save){
+    var sid = save.getAttribute("data-save");
+    var patch = {
+      company: $("f-company-"+sid).value.trim(),
+      role: $("f-role-"+sid).value.trim(),
+      status: $("f-status-"+sid).value,
+      kind: $("f-kind-"+sid).value,
+      nextAction: $("f-next-"+sid).value.trim(),
+      lastActivityAt: $("f-last-"+sid).value || null,
+      notes: $("f-notes-"+sid).value,
+      updatedAt: new Date().toISOString()
+    };
+    save.disabled = true; save.textContent = "Kaydediliyor…";
+    var ok = await patchDoc("applications/"+sid, patch);
+    save.disabled = false; save.textContent = "Kaydet";
+    if(ok){ expanded = null; toast("Kaydedildi."); }
+    return;
+  }
+  var del = ev.target.closest("button[data-del]");
+  if(del){
+    var did = del.getAttribute("data-del");
+    var rec = apps.get(did) || {};
+    if(!window.confirm((rec.company || "Bu kayıt") + " silinsin mi? Geri alınamaz.")) return;
+    if(!db){ toast("Kayıt deposu kapalı, silinemedi.", true); return; }
+    try { await db.doc("applications/"+did).delete(); expanded = null; toast("Silindi."); }
+    catch(e){ toast(dbErrText(e), true); }
+  }
+});
+
+/* ---------------- elle ekleme ---------------- */
+var newOpen = false;
+$("btn-new").addEventListener("click", function(){
+  newOpen = !newOpen;
+  var box = $("new-form");
+  box.hidden = !newOpen;
+  this.textContent = newOpen ? "Vazgeç" : "Elle ekle";
+  if(!newOpen){ box.innerHTML = ""; return; }
+  box.innerHTML = '<div class="detail" style="border-top:0">' +
+    '<div class="detail-grid">' +
+      '<div class="fgroup"><label for="n-company">Kurum</label><input class="field" id="n-company" placeholder="ör. Madlen"></div>' +
+      '<div class="fgroup"><label for="n-role">Rol</label><input class="field" id="n-role" placeholder="ör. Growth Intern"></div>' +
+      '<div class="fgroup"><label for="n-contact">Kişi / e-posta</label><input class="field" id="n-contact" placeholder="ad@sirket.com"></div>' +
+      '<div class="fgroup"><label for="n-kind">Tür</label>' + kindSelect("new", "sirket").replace('id="f-kind-new"','id="n-kind"') + '</div>' +
+      '<div class="fgroup"><label for="n-date">Gönderim tarihi</label><input class="field" type="date" id="n-date" value="'+todayISO()+'"></div>' +
+      '<div class="fgroup"><label for="n-status">Durum</label>' + statusSelect("new", "gonderildi").replace('id="f-status-new"','id="n-status"') + '</div>' +
+    '</div>' +
+    '<div class="fgroup" style="margin-top:12px"><label for="n-notes">Notlar</label><textarea class="field" id="n-notes"></textarea></div>' +
+    '<div class="detail-foot"><span class="detail-meta">Gmail\'de izi olmayan başvurular, referanslar, formla yapılan başvurular için.</span>' +
+    '<button class="btn btn-primary btn-sm" id="n-save">Ekle</button></div></div>';
+  $("n-save").addEventListener("click", async function(){
+    var company = $("n-company").value.trim();
+    if(!company){ toast("Kurum adı gerekli.", true); $("n-company").focus(); return; }
+    var when = $("n-date").value || todayISO();
+    var id = "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    var ok = await writeDoc("applications/"+id, {
+      company: company, role: $("n-role").value.trim(), contact: $("n-contact").value.trim(),
+      contactName: nameFromAddr($("n-contact").value.trim()), subject: "",
+      kind: $("n-kind").value, status: $("n-status").value,
+      sentAt: when, lastActivityAt: when, replied: false, bounced: false,
+      notes: $("n-notes").value, nextAction: "", source: "manual", threadId: null,
+      updatedAt: new Date().toISOString()
+    });
+    if(ok){
+      toast(company + " eklendi.");
+      newOpen = false; $("new-form").hidden = true; $("new-form").innerHTML = ""; $("btn-new").textContent = "Elle ekle";
+    }
+  });
+});
+
+renderAll();
+})();
+</script>
