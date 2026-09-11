@@ -1,5 +1,5 @@
-<title>Başvuru Hattı</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+<title>Yiğit Baykut Reachout CRM</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
   --bg:#F6F8F7; --surface:#FFFFFF; --surface-2:#EDF1F0; --surface-3:#E3E9E7;
@@ -12,9 +12,10 @@
   --mute-soft:#E7EBEA; --mute-line:#C8D2D0;
   --radius:10px;
   --shadow:0 1px 2px rgba(18,25,24,.05), 0 8px 24px -14px rgba(18,25,24,.28);
-  --sans:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --serif:"Instrument Serif", Georgia, "Times New Roman", serif;
+  /* cihazda gerçek Google Sans varsa o kullanılır; yoksa en yakın açık alternatif */
+  --ui:"Google Sans","Product Sans","Outfit", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --sans:var(--ui); --mono:var(--ui); --serif:var(--ui);
+  --code:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -47,6 +48,12 @@ body{
   font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
 }
 .wrap{max-width:1060px; margin:0 auto; padding-inline:20px; padding-block:28px 72px;}
+.wrap, #toast{text-transform:uppercase}
+/* form kontrolleri text-transform'u miras almaz, tek tek vermek gerekiyor */
+.wrap button, .wrap select, .wrap option, #toast .toast{text-transform:uppercase}
+/* yazdigi yuzeyler oldugu gibi kalsin, duzenlemesi zorlasmasin */
+.wrap input, .wrap textarea{text-transform:none}
+#q-input{font-family:var(--code)}
 h1,h2,h3{margin:0; text-wrap:balance}
 button{font:inherit; color:inherit; cursor:pointer}
 input,select,textarea{font:inherit; color:inherit}
@@ -54,18 +61,13 @@ input,select,textarea{font:inherit; color:inherit}
 
 /* ---------- header ---------- */
 .masthead{display:flex; flex-wrap:wrap; align-items:flex-end; gap:16px 24px; justify-content:space-between; padding-bottom:18px; border-bottom:1px solid var(--line-strong)}
-.brand h1{font-family:var(--serif); font-size:40px; font-weight:400; letter-spacing:-.01em; line-height:1}
-.brand p{margin:7px 0 0; color:var(--ink-3); font-size:13.5px; max-width:52ch}
-.masthead-meta{display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:12px; color:var(--ink-3)}
-.dot{width:7px; height:7px; border-radius:50%; background:var(--mute-line); flex:none}
-.dot.on{background:var(--good)}
-.dot.off{background:var(--bad)}
+.brand h1{font-family:var(--ui); font-size:30px; font-weight:600; letter-spacing:.015em; line-height:1.15}
 
 /* ---------- summary tiles ---------- */
 .tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:22px}
 .tile{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px 15px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:2px}
 .tile .k{font-size:11.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-3); font-weight:500}
-.tile .v{font-family:var(--serif); font-size:36px; line-height:1.05; font-variant-numeric:tabular-nums}
+.tile .v{font-family:var(--ui); font-weight:600; font-size:34px; line-height:1.05; font-variant-numeric:tabular-nums}
 .tile .n{font-size:12.5px; color:var(--ink-3)}
 .tile.alert{border-color:var(--warn-line); background:var(--warn-soft)}
 .tile.alert .v, .tile.alert .k{color:var(--warn)}
@@ -166,7 +168,7 @@ textarea.field{resize:vertical; min-height:62px}
 .btn-danger.armed:hover{background:var(--bad); filter:brightness(1.06)}
 
 .empty{padding:40px 16px; text-align:center; color:var(--ink-3); font-size:13.5px}
-.empty strong{display:block; font-family:var(--serif); font-size:22px; color:var(--ink-2); font-weight:400; margin-bottom:6px}
+.empty strong{display:block; font-family:var(--ui); font-weight:600; font-size:17px; color:var(--ink-2); font-weight:400; margin-bottom:6px}
 
 /* ---------- toast ---------- */
 #toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%); display:flex; flex-direction:column; gap:8px; z-index:40; width:min(440px, calc(100vw - 32px))}
@@ -191,13 +193,11 @@ textarea.field{resize:vertical; min-height:62px}
 @media (prefers-reduced-motion:reduce){*{transition:none !important; animation:none !important}}
 </style>
 
-<div class="wrap">
+<div class="wrap" lang="tr">
   <header class="masthead">
     <div class="brand">
-      <h1>Başvuru Hattı</h1>
-      <p>Gönderdiğin staj, rol ve araştırma maillerinin hangisine cevap geldi, hangisi kaç gündür sessiz.</p>
+      <h1>Yiğit Baykut Reachout CRM</h1>
     </div>
-    <div class="masthead-meta"><span class="dot" id="db-dot"></span><span id="db-state">bağlanıyor…</span></div>
   </header>
 
   <section class="tiles" id="tiles" aria-label="Özet"></section>
@@ -266,7 +266,7 @@ var STATUS = {
 };
 var STATUS_ORDER = ["gonderildi","cevap","gorusme","case","teklif","red","kapandi"];
 var OPEN = ["gonderildi","cevap","gorusme","case","teklif"];
-var KINDS = {sirket:"Şirket", startup:"Startup Reachout", research:"Research Reachout", kulup:"Kulüp / Diğer"};
+var KINDS = {sirket:"Şirket", startup:"Startup Reachout", research:"Research Reachout", linkedin:"LinkedIn", kulup:"Kulüp / Diğer"};
 // "akademi" eski kayıtlarda kaldı; Research Reachout altında görünsün diye eşliyoruz
 var KIND_ALIAS = {akademi:"research"};
 function kindOf(rec){ var k = rec && rec.kind; k = KIND_ALIAS[k] || k; return KINDS[k] ? k : "sirket"; }
@@ -317,8 +317,9 @@ function dbErrText(e){
   return "Kayıt sırasında bir sorun çıktı, değişiklik saklanmamış olabilir.";
 }
 function setDbState(kind, text){
-  var dot = $("db-dot"); dot.className = "dot" + (kind ? " "+kind : "");
-  $("db-state").textContent = text;
+  // gosterge basliktan kaldirildi; hatalar toast ile bildiriliyor
+  var dot = $("db-dot"); if(dot) dot.className = "dot" + (kind ? " "+kind : "");
+  var st = $("db-state"); if(st) st.textContent = text;
 }
 
 if(window.claude && typeof window.claude.use === "function"){
@@ -571,7 +572,7 @@ function renderTiles(){
   var active = all.filter(function(a){ return ["cevap","gorusme","case","teklif"].indexOf(a.status) >= 0; });
   var last30 = all.filter(function(a){ var d = dayDiff(a.sentAt); return d != null && d <= 30; });
   var tiles = [
-    {k:"Cevap bekleyen", v:waiting.length, n:"gönderildi, henüz dönüş yok"},
+    {k:"Gönderilen", v:waiting.length, n:"gönderildi, henüz dönüş yok"},
     {k:STALE_DAYS+"+ gündür sessiz", v:stale.length, n:stale.length ? "hatırlatma maili zamanı" : "takipte gecikme yok", alert: stale.length > 0},
     {k:"Yürüyen süreç", v:active.length, n:"cevap, görüşme, case, teklif"},
     {k:"Son 30 gün", v:last30.length, n:"gönderilen başvuru"}
@@ -863,7 +864,7 @@ $("btn-new").addEventListener("click", function(){
       '<div class="fgroup"><label for="n-company">Kurum</label><input class="field" id="n-company" placeholder="ör. Madlen"></div>' +
       '<div class="fgroup"><label for="n-role">Rol</label><input class="field" id="n-role" placeholder="ör. Growth Intern"></div>' +
       '<div class="fgroup"><label for="n-contact">Kişi / e-posta</label><input class="field" id="n-contact" placeholder="ad@sirket.com"></div>' +
-      '<div class="fgroup"><label for="n-kind">Tür</label>' + kindSelect("new", "sirket").replace('id="f-kind-new"','id="n-kind"') + '</div>' +
+      '<div class="fgroup"><label for="n-kind">Tür</label>' + kindSelect("new", filter.kind !== "all" ? filter.kind : "sirket").replace('id="f-kind-new"','id="n-kind"') + '</div>' +
       '<div class="fgroup"><label for="n-date">Gönderim tarihi</label><input class="field" type="date" id="n-date" value="'+todayISO()+'"></div>' +
       '<div class="fgroup"><label for="n-status">Durum</label>' + statusSelect("new", "gonderildi").replace('id="f-status-new"','id="n-status"') + '</div>' +
     '</div>' +
@@ -874,18 +875,25 @@ $("btn-new").addEventListener("click", function(){
     var company = $("n-company").value.trim();
     if(!company){ toast("Kurum adı gerekli.", true); $("n-company").focus(); return; }
     var when = $("n-date").value || todayISO();
+    var newKind = $("n-kind").value, newStatus = $("n-status").value;
     var id = "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     var ok = await writeDoc("applications/"+id, {
       company: company, role: $("n-role").value.trim(), contact: $("n-contact").value.trim(),
       contactName: nameFromAddr($("n-contact").value.trim()), subject: "",
-      kind: $("n-kind").value, status: $("n-status").value,
+      kind: newKind, status: newStatus,
       sentAt: when, lastActivityAt: when, replied: false, bounced: false,
       notes: $("n-notes").value, nextAction: "", source: "manual", threadId: null,
       updatedAt: new Date().toISOString()
     });
     if(ok){
+      // yeni kayit aktif filtrenin disina dusuyorsa filtreyi ona getir,
+      // yoksa kaydedildigi halde ekranda hicbir sey olmamis gibi gorunuyor
+      var grp = (STATUS[newStatus] || {}).group;
+      filter.kind = KINDS[newKind] ? newKind : "sirket";
+      filter.group = (grp === "closed") ? "closed" : "open";
       toast(company + " eklendi.");
       newOpen = false; $("new-form").hidden = true; $("new-form").innerHTML = ""; $("btn-new").textContent = "Elle ekle";
+      renderAll();
     }
   });
 });
